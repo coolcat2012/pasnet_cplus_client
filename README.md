@@ -7,6 +7,7 @@ the example command:
 
 ./rdkafka_simple_producer -s [NtripCasterURL] -r [Port] -u [Username] -p [Password] -b [KafkaBrokers] -M 1 -d [Mountpoint] -3
 
+it will use the mountpoint as the topic name
 
 ## Build from source
 
