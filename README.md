@@ -9,4 +9,5 @@ the example command:
 ## Build from source
 
 ./configure
+
 make
