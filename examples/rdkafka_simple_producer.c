@@ -3724,6 +3724,7 @@ struct Args
   const char *bdsephemeris;
   const char *mixedephemeris;
   const char *brokers;
+  const char *topic;
 };
 
 /* option parsing */
@@ -3753,9 +3754,10 @@ static struct option opts[] = {
 { "mode",             required_argument, 0, 'M'},
 { "help",             no_argument,       0, 'h'},
 { "brokers",          required_argument, 0, 'b'},
+{ "topic",            required_argument, 0, 'k'},
 {0,0,0,0}};
 #endif
-#define ARGOPT "-d:s:p:r:t:f:u:E:C:G:B:b:P:Q:M:S:R:n:h3O"
+#define ARGOPT "-d:s:p:r:k:f:u:E:C:G:B:b:t:P:Q:M:S:R:n:h3O"
 
 enum MODE { HTTP = 1, RTSP = 2, NTRIP1 = 3, AUTO = 4, END };
 
@@ -3897,6 +3899,7 @@ static int getargs(int argc, char **argv, struct Args *args)
   args->proxyport = "2101";
   args->mode = AUTO;
   args->brokers = "localhost:9092";
+  args->topic = "mytopic";
   help = 0;
 
   do
@@ -3912,6 +3915,7 @@ static int getargs(int argc, char **argv, struct Args *args)
     case 'u': args->user = optarg; break;
     case 'p': args->password = optarg; break;
     case 'b': args->brokers = optarg;break;
+    case 'k': args->topic = optarg;break;
     case 'd': args->data = optarg; break;
     case 'f': args->headerfile = optarg; break;
     case 'C': args->bdsephemeris = optarg; break;
@@ -4016,6 +4020,7 @@ static int getargs(int argc, char **argv, struct Args *args)
     " -O " LONG_OPT("--changeobs        ") "Add observation type change header lines\n"
     " -M " LONG_OPT("--mode             ") "mode for data request\n"
     " -b " LONG_OPT("--brokers          ") "kafka brokers\n"
+    " -t " LONG_OPT("--topic            ") "kafka topic\n"
     "     Valid modes are:\n"
     "     1, h, http     NTRIP Version 2.0 Caster in TCP/IP mode\n"
     "     2, r, rtsp     NTRIP Version 2.0 Caster in RTSP/RTP mode\n"
@@ -4113,7 +4118,7 @@ int main(int argc, char **argv)
     alarm(ALARMTIME);
 
     strcpy(brokers, args.brokers);
-    strcpy(topic, args.data);
+    strcpy(topic, args.topic);
     init_kafka();
 
     Parser.headerfile = args.headerfile;
