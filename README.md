@@ -5,7 +5,11 @@ This program is connecting to the PAS Ntrip Caster (as the Ntrip Client) mountpi
 the example command:
 
 
-./rdkafka_simple_producer -s [NtripCasterURL] -r [Port] -u [Username] -p [Password] -b [KafkaBrokers] -M 1 -d [Mountpoint] -3
+./rdkafka_simple_producer -s [NtripCasterURL] -r [Port] -u [Username] -p [Password] -b [KafkaBrokers] -M 1 -d [Mountpoint] -3 -k [KafkaTopic]
+
+for example:
+
+./rdkafka_simple_producer -s test2.test.com -r 1234 -u test262 -p ppppqqqqq -M 1 -d 12345678903 -3 -k mytopic -b localhost:9092
 
 it will use the mountpoint as the topic name
 
