@@ -11,8 +11,6 @@ for example:
 
 ./rdkafka_simple_producer -s test2.test.com -r 1234 -u test262 -p ppppqqqqq -M 1 -d 12345678903 -3 -k mytopic -b localhost:9092
 
-it will use the mountpoint as the topic name
-
 ## Build from source
 
 ./configure
