@@ -64,9 +64,11 @@ static char revisionstr[] = "$Revision$";
 #define COMPILEDATE " built " __DATE__
 #endif
 
-
+#define MAXLOGBUF 1000000
 
 static int run = 1;
+static int logpending = 0;
+static char gBuffer[MAXLOGBUF +1];
 
 /**
  * @brief Signal termination of program
@@ -168,7 +170,7 @@ int init_kafka () {
 }
 
 void produce_message(char* buf1) {
-   char buf[512];
+   char buf[MAXLOGBUF+1];
    if(buf1 == NULL) return;
    
    strcpy(buf, buf1);
@@ -2149,13 +2151,39 @@ void RTCM3Error(const char *fmt, ...)
 }
 #endif
 
+
+void handleBuffer(char* buf)
+{
+    if(logpending)
+    {
+        if(strlen(buf) + strlen(gBuffer) < MAXLOGBUF)
+        {
+            strcat(gBuffer, buf);
+        }
+    }
+    else
+    {
+        if(strlen(gBuffer) > 0)
+        {
+            produce_message(gBuffer);
+            gBuffer[0] = 0;
+        }
+        if(strlen(buf) > 0)
+        {
+            produce_message(buf);
+        }
+    }
+}
+
+//if in the pending mode, this function will append to a global buffer, until pending mode is finish then dump global buffer to kafka
+//if not in pending mode, then dump global first before dumping this one
 void RTCM3Text(const char *fmt, ...)
 {
   char buffer[1000], *b;
   va_list v;
   va_start(v, fmt);
   vsprintf(buffer, fmt, v);
-  produce_message(buffer);
+  handleBuffer(buffer);
   va_end(v);
 }
 
@@ -3179,6 +3207,7 @@ void HandleByte(struct RTCM3ParserData *Parser, unsigned int byte)
             RTCM3Text("%s\n                             "
             "                               END OF HEADER\n", newheader);
           }
+          logpending = 1;
           if(Parser->Data.numsats > 0)
           RTCM3Text("> %04d %02d %02d %02d %02d%11.7f  %d%3d\n",
           cti.year, cti.month, cti.day, cti.hour, cti.minute, cti.second
@@ -3490,6 +3519,8 @@ void HandleByte(struct RTCM3ParserData *Parser, unsigned int byte)
             }
             RTCM3Text("\n");
           }
+          logpending = 0;
+          RTCM3Text("");
         }
         else
         {
@@ -4086,6 +4117,8 @@ int main(int argc, char **argv)
   setbuf(stdout, 0);
   setbuf(stdin, 0);
   setbuf(stderr, 0);
+
+  gBuffer[0] = 0;
 
   fixrevision();
 
